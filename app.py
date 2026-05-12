@@ -6,6 +6,9 @@ import pickle
 import os
 from pathlib import Path
 
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 # Page config
 st.set_page_config(
     page_title="Customer Churn Prediction",
@@ -13,41 +16,60 @@ st.set_page_config(
     layout="centered"
 )
 
+def get_file_path(filename):
+    """Get the absolute or relative path to a file, handling both local and Streamlit Cloud."""
+    # Try current directory first
+    if os.path.exists(filename):
+        return filename
+    # Try relative to script directory
+    script_dir = Path(__file__).parent
+    script_path = script_dir / filename
+    if script_path.exists():
+        return str(script_path)
+    # Fallback to filename (works on Streamlit Cloud)
+    return filename
+
 @st.cache_resource
 def load_model_and_preprocessors():
     """Load model and preprocessors with error handling."""
     try:
+        # Get file paths
+        model_path = get_file_path('churn_model.h5')
+        
         # Check if model file exists
-        model_path = 'churn_model.h5'
         if not os.path.exists(model_path):
             st.error(f"❌ Model file not found: {model_path}")
+            st.info("Please ensure churn_model.h5 is in the repository")
             st.stop()
         
-        # Load model
+        # Load model with custom object scope
         model = tf.keras.models.load_model(model_path)
         
         # Load scaler
-        scaler_path = 'scaler.pkl'
+        scaler_path = get_file_path('scaler.pkl')
         if not os.path.exists(scaler_path):
             st.error(f"❌ Scaler file not found: {scaler_path}")
+            st.info("Please ensure scaler.pkl is in the repository")
             st.stop()
         
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)
         
         # Load one-hot encoder
-        encoder_path = 'one_hot_encoder.pkl'
+        encoder_path = get_file_path('one_hot_encoder.pkl')
         if not os.path.exists(encoder_path):
             st.error(f"❌ One-hot encoder file not found: {encoder_path}")
+            st.info("Please ensure one_hot_encoder.pkl is in the repository")
             st.stop()
         
         with open(encoder_path, 'rb') as f:
             one_hot_encoder = pickle.load(f)
         
         # Load label encoder
-        label_encoder_path = 'label_encoder.pkl'
+        label_encoder_path = get_file_path('label_encoder.pkl')
         if not os.path.exists(label_encoder_path):
             st.error(f"❌ Label encoder file not found: {label_encoder_path}")
+            st.info("Please ensure label_encoder.pkl is in the repository")
             st.stop()
         
         with open(label_encoder_path, 'rb') as f:
