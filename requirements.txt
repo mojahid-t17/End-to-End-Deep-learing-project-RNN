@@ -1,6 +1,6 @@
 numpy
 pandas
 scikit-learn
-tensorflow
-TensorBoard
+tensorflow==2.19.0
+tensorboard
 streamlit
